@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Records DocAI</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <main class="container">
+        <section class="panel">
+            <h1>Medical Records DocAI</h1>
+            <p class="muted">Upload records, group by patient ID, extract highlights, search pages, and ask grounded questions.</p>
+
+            <div class="card">
+                <h2>Ingest Local Dataset</h2>
+                <div class="row">
+                    <input id="datasetDir" type="text" value="{{ default_data_dir }}" />
+                    <button onclick="ingestDataset()">Ingest Dataset</button>
+                </div>
+                <p id="ingestStatus" class="muted"></p>
+            </div>
+
+            <div class="card">
+                <h2>Patients</h2>
+                <button onclick="loadPatients()">Refresh Patients</button>
+                <div id="patients"></div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="card">
+                <h2>Patient Summary</h2>
+                <pre id="patientSummary">Select a patient.</pre>
+            </div>
+
+            <div class="card">
+                <h2>Search Records</h2>
+                <div class="row">
+                    <input id="searchQuery" type="text" placeholder="Search records" />
+                    <button onclick="searchRecords()">Search</button>
+                </div>
+                <div id="searchResults"></div>
+            </div>
+
+            <div class="card">
+                <h2>Ask a Question</h2>
+                <div class="row">
+                    <input id="questionInput" type="text" placeholder="What medications is the patient taking?" />
+                    <button onclick="askQuestion()">Ask</button>
+                </div>
+                <pre id="answerBox"></pre>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let selectedPatientId = null;
+
+        async function ingestDataset() {
+            const datasetDir = document.getElementById('datasetDir').value;
+            const response = await fetch('/api/ingest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dataset_dir: datasetDir })
+            });
+            const data = await response.json();
+            document.getElementById('ingestStatus').innerText = JSON.stringify(data, null, 2);
+            await loadPatients();
+        }
+
+        async function loadPatients() {
+            const response = await fetch('/api/patients');
+            const patients = await response.json();
+            const root = document.getElementById('patients');
+            root.innerHTML = '';
+            patients.forEach((patient) => {
+                const button = document.createElement('button');
+                button.className = 'patient-button';
+                button.innerText = `${patient.patient_id} (${patient.page_count} pages)`;
+                button.onclick = () => loadPatient(patient.patient_id);
+                root.appendChild(button);
+            });
+        }
+
+        async function loadPatient(patientId) {
+            selectedPatientId = patientId;
+            const response = await fetch(`/api/patients/${patientId}`);
+            const patient = await response.json();
+            document.getElementById('patientSummary').innerText = JSON.stringify(patient, null, 2);
+        }
+
+        async function searchRecords() {
+            const query = document.getElementById('searchQuery').value;
+            const response = await fetch('/api/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, patient_id: selectedPatientId, top_k: 5 })
+            });
+            const results = await response.json();
+            const root = document.getElementById('searchResults');
+            root.innerHTML = results.map((item) => `
+                <div class="result">
+                    <strong>${item.patient_id}</strong> | ${item.source_file} | page ${item.page_number}<br>
+                    <span>${item.snippet}</span>
+                </div>
+            `).join('');
+        }
+
+        async function askQuestion() {
+            const question = document.getElementById('questionInput').value;
+            const response = await fetch('/api/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question, patient_id: selectedPatientId })
+            });
+            const data = await response.json();
+            document.getElementById('answerBox').innerText = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>

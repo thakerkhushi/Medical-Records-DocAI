@@ -1,0 +1,79 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f7fb;
+    color: #18212f;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 24px;
+}
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.row {
+    display: flex;
+    gap: 8px;
+}
+
+input,
+button {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #c7d2e3;
+}
+
+input {
+    flex: 1;
+}
+
+button {
+    cursor: pointer;
+    background: #1f5eff;
+    color: #ffffff;
+    border: none;
+}
+
+button:hover {
+    background: #184dce;
+}
+
+.patient-button {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    text-align: left;
+}
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: #f7f9fc;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.result {
+    background: #f7f9fc;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+}
+
+.muted {
+    color: #5c6777;
+}

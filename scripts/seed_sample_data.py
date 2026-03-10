@@ -2,8 +2,8 @@
 from pathlib import Path
 import shutil
 
-SOURCE_DIR = Path("/mnt/data/dataset_extracted")
-TARGET_DIR = Path("/mnt/data/docai_medical_records/data/sample_dataset")
+SOURCE_DIR = Path("data/dataset_extracted")
+TARGET_DIR = Path("data/docai_medical_records/data/sample_dataset")
 
 
 def main() -> None:
